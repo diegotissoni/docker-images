@@ -1,0 +1,5 @@
+#!/bin/bash
+CONFIG_DIR=$1
+CONFIG_FILE_URI=$2
+
+wget -P $CONFIG_DIR $CONFIG_FILE_URI
