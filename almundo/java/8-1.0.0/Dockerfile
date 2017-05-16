@@ -1,4 +1,4 @@
-FROM java:8
+FROM openjdk:8
 MAINTAINER Franco Morinigo <franco.morinigo@almundo.com>
 
 # Install jq
