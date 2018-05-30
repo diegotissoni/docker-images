@@ -8,6 +8,14 @@ JVMARGS=$(jq --raw-output '.jvmArguments' $APP_PATH/${ENV}/deploy-properties.jso
 # Expanding ENV vars
 JVMARGS=$(eval echo $JVMARGS)
 
+# NewRelic
+NEW_RELIC_ENABLED=$(jq --raw-output '.newRelicEnabled' $APP_PATH/${ENV}/deploy-properties.json)
+if [ $NEW_RELIC_ENABLED = "true"  ]; then
+  JVMARGS+="  -javaagent:${APP_PATH}/newrelic/newrelic.jar \
+    -Dnewrelic.config.file=${APP_PATH}/newrelic/newrelic.yml \
+    -Dnewrelic.environment=${ENV}"
+fi
+
 # JMX and Debug
 SPECIAL_PORT="9010"
 DEBUG_ENABLED=$(jq --raw-output '.debugEnabled' $APP_PATH/${ENV}/deploy-properties.json)
@@ -28,14 +36,6 @@ elif [ $JXM_ENABLED = "true" ]; then
               -Dcom.sun.management.jmxremote.ssl=false \
               -Djava.rmi.server.hostname=${HOST_IP}"
 fi
-
-# NewRelic
-NEW_RELIC_ENABLED=$(jq --raw-output '.newRelicEnabled' $APP_PATH/${ENV}/deploy-properties.json)
-if [ $NEW_RELIC_ENABLED = "true"  ]; then
-  JVMARGS+="  -javaagent:${APP_PATH}/newrelic/newrelic.jar \
-              -Dnewrelic.environment=${ENV}"
-fi
-
 
 # Starting application
 trap 'kill -TERM $PID' TERM INT
