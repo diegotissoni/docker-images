@@ -6,16 +6,16 @@ MAINCLASS=$(jq --raw-output '.mainClass' $APP_PATH/${ENV}/deploy-properties.json
 JVMARGS=$(jq --raw-output '.jvmArguments' $APP_PATH/${ENV}/deploy-properties.json)
 
 # JMX and Debug
-SPECIAL_PORT="9010"
+SPECIAL_PORT=$DEBUG_PORT
 DEBUG_ENABLED=$(jq --raw-output '.debugEnabled' $APP_PATH/${ENV}/deploy-properties.json)
 JXM_ENABLED=$(jq --raw-output '.jmxEnabled' $APP_PATH/${ENV}/deploy-properties.json)
 
-if [ $DEBUG_ENABLED = "true"  ]; then
+if [ "$DEBUG_ENABLED" = "true" ]; then
 
   JVMARGS="$JVMARGS  -Xdebug \
               -Xrunjdwp:server=y,transport=dt_socket,address=${SPECIAL_PORT},suspend=n"
 
-elif [ $JXM_ENABLED = "true" ]; then
+elif [ "$JXM_ENABLED" = "true" ]; then
 
   JVMARGS="$JVMARGS  -Dcom.sun.management.jmxremote=true \
               -Dcom.sun.management.jmxremote.port=${SPECIAL_PORT} \
@@ -28,14 +28,14 @@ fi
 
 # NewRelic
 NEW_RELIC_ENABLED=$(jq --raw-output '.newRelicEnabled' $APP_PATH/${ENV}/deploy-properties.json)
-if [ $NEW_RELIC_ENABLED = "true"  ]; then
+if [ "$NEW_RELIC_ENABLED" = "true"  ]; then
   JVMARGS="$JVMARGS -javaagent:${APP_PATH}/newrelic/newrelic.jar \
               -Dnewrelic.environment=${ENV}"
 fi
 
 # Starting application
 trap 'kill -TERM $PID' TERM INT
-java $JVMARGS -cp "${JAR}:${APP_PATH}/common:${APP_PATH}/${ENV}" -server -Dspring.profiles.active=${ENV} -Dserver.port=8080 ${MAINCLASS} &
+java $JVMARGS -cp "${JAR}:${APP_PATH}/common:${APP_PATH}/${ENV}" -server -Dspring.profiles.active=${ENV} -Dserver.port=${APPLICATION_PORT} ${MAINCLASS} &
 PID=$!
 wait $PID
 trap - TERM INT
