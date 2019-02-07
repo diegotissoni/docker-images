@@ -20,8 +20,7 @@ JXM_ENABLED=$(jq --raw-output '.jmxEnabled' $APP_PATH/${ENV}/deploy-properties.j
 
 if [ $DEBUG_ENABLED = "true"  ]; then
 
-  JVMARGS+="  -Xdebug \
-              -Xrunjdwp:server=y,transport=dt_socket,address=${SPECIAL_PORT},suspend=n"
+  JVMARGS+="  -agentlib:jdwp=transport=dt_socket,address=${SPECIAL_PORT},server=y,suspend=n"
 
 elif [ $JXM_ENABLED = "true" ]; then
 
